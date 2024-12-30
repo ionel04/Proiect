@@ -20,6 +20,30 @@ class LinieCurata
         {
             return 0; 
         }
+        if(aux.equals("ADDI"))
+        {
+            return 1;
+        }else{
+            return 0;
+        }
+        if(aux.equals("MUL"))
+        {    
+            return 1;
+        }else{
+            return 0;
+        }
+        if(aux.equals("SUB"))
+        {    
+            return 1;
+        }else{
+            return 0;
+        }
+        if(aux.equals("DIV"))
+        {
+            return 1;
+        }else{
+            return 0;
+        }
     }
 
     String removeConsecutiveSpaces(String input) 
