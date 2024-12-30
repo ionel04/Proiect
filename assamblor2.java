@@ -131,6 +131,30 @@ class Instructiune {
             setFunct7("0000000");
             setRegisters(linieInput[2], linieInput[3], linieInput[4]);
         }
+        if(linieInput[1].equals("ADDI")){
+            setOpcode("0010011");
+            setFunct3("000");
+            setFunct7("");  //aici trebuie introdusi primii 7 biti dintr-un vector imm
+            setRegisters(linieInput[2], linieInput[3], ); //la ultimul parametru trebuie introdusi ultimii 5 biti din vectorul imm
+        }
+        if(linieInput[1].equals("SUB")){
+            setOpcode("0110011");
+            setFunct3("000");
+            setFunct7("0100000");
+            setRegisters(linieInput[2], linieInput[3], linieInput[4]);
+        }
+        if(linieInput[1].equals("MUL")){
+            setOpcode("0110011");
+            setFunct3("000");
+            setFunct7("0000001");
+            setRegisters(linieInput[2], linieInput[3], linieInput[4]);
+        }
+        if(linieInput[1].equals("DIV"){
+            setOpcode("0110011");
+            setFunct3("100");
+            setFunct7("0000001");
+            setRegisters(linieInput[2], linieInput[3], linieInput[4]);
+        }
     }
 
     private void setOpcode(String opcode) {
