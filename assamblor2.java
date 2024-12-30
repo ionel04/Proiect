@@ -35,16 +35,19 @@ class LinieCurata {
 
         else if (aux.equals("MUL")) 
         {
+            aux = aux + " R";
             return 1; 
         } 
 
         else if (aux.equals("MULI")) 
         {
+            aux = aux + " I";
             return 1; 
         } 
 
         else if (aux.equals("DIV")) 
         {
+            aux = aux + " R";
             return 1; 
         } 
 
