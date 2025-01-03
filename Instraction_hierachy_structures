@@ -1,0 +1,39 @@
+abstract class Instruction{
+    public int opcode;
+    public Instruction(int op)
+    {
+        opcode = op;
+    }
+    abstract void execute();
+}
+
+
+abstract class RType extends Instruction
+{
+    public int rd;
+    public int rs1, rs2;
+    public int func7, func3;
+    public RType(int rs, int rs1, int rs2, int func7, int func3, int op)
+    {
+        super(op);
+        this.rd = rs;
+        this.rs1 = rs1;
+        this.rs2 = rs2;
+        this.func7 = func7;
+        this.func3 = func3;
+
+    }
+
+}
+
+class Add extends RType
+{
+    public Add(int rd, int rs1, int rs2, int func7, int func3, int op)
+    {
+        super(rd,rs1,rs2,func7,func3,op);
+    }
+    public void execute()
+    {
+
+    }
+}
