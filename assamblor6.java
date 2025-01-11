@@ -121,6 +121,20 @@ class Instructiune {
                 setFunct7("0000000");
                 setRegisters(tokens[2], tokens[3], tokens[4]);
                 break;
+                
+            case "OR":
+                setOpcode("0110011");
+                setFunct3("110");
+                setFunct7("0000000");
+                setRegisters(tokens[2], tokens[3], tokens[4]);
+                break;
+
+            case "AND":
+                setOpcode("0110011");
+                setFunct3("111");
+                setFunct7("0000000");
+                setRegisters(tokens[2], tokens[3], tokens[4]);
+                break;
 
             case "ADDI":
                 setOpcode("0010011");
