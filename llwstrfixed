@@ -489,9 +489,8 @@ class Instructiune {
     }
 
     private void setImmediate(String bin) {
-        for (int i = 0; i < bin.length(); i++) {
-            rez[31 - i] = bin.charAt(bin.length() - 1 - i) - '0';
-        }
+       for (int i = 0; i < 12; i++) {
+        rez[20 + i] = bin.charAt(11 - i) - '0'; 
     }
 
     private void setImmediateStore(String imm)
