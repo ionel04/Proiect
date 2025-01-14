@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.lang.Math; 
 
 class UnknownInstruction extends Exception {
     public UnknownInstruction(String msg) {
@@ -266,31 +267,16 @@ class Instructiune {
                 setOpcode("0000011");
                 setFunct3("010");
                 setRegDest(tokens[2]);
-                String aux = StringToBin12Bits(tokens[3]); // valoarea de offset, formula pentru adresa = imm + valoare reg baza
-                setImmediate(aux);
+                int aux = Integer.parseInt(tokens[3]); // valoarea de offset, formula pentru adresa = imm + valoare reg baza
+                setImmediateBit(aux,20,12);
                 setRegBase(tokens[4]);
                 break;
 
             case "SW": // store din registru in memorie
                 setOpcode("0100011");              // Correct: opcode for store instructions (SW)
                 setFunct3("010");                  // Correct: funct3 for SW is 010
-                String imm = StringToBin12Bits(tokens[3]);  // Convert immediate (offset) to 12-bit binary string
-                System.out.println(imm);
-                String immHigh = imm.substring(0, 5);   
-                System.out.println(immHigh);
-                String immLow = imm.substring(5, 12);
-                System.out.println(immLow); 
-                
-                for(int i=7; i<=11; i++) 
-                {
-                    rez[i] = immHigh.charAt(i - 7) - '0';
-                } 
-                
-                 for(int i=25; i<32; i++) 
-                {
-                    rez[i] = immLow.charAt(i - 25) - '0';
-                } 
-                
+                //token[3] val imediata
+                setImmediateStore(tokens[3]);
                 setRegBase(tokens[4]);                 
                 setRs2(tokens[2]);                     
                 break; 
@@ -504,9 +490,20 @@ class Instructiune {
     }
 
     private void setImmediate(String bin) {
-        for (int i = 0; i < bin.length(); i++) {
-            rez[31 - i] = bin.charAt(bin.length() - 1 - i) - '0';
-        }
+         for (int i = 0; i < 12; i++) {
+        rez[20 + i] = bin.charAt(11 - i) - '0'; // Map immediate to bits 31:20
+    }   
+    }
+
+    private void setImmediateStore(String imm)
+    {
+        int val = Integer.parseInt(imm);
+        // 7 11 - 0 4
+        //25 31 - 5 11
+        for(int i=7;i<=11;i++)
+            rez[i] = (val>>(i-7)) & 1;
+        for(int i=25;i<=31;i++)
+            rez[i] = (val >> (i-20)) & 1;
     }
 
     private void setImmediateBit(int val, int start, int numberOFBits)
@@ -564,11 +561,87 @@ class Instructiune {
     public int[] returnRez() {
         return rez;
     }
+} 
+
+class Memory {
+    private byte[] memory;
+
+    
+    Memory(int MEMORY_SIZE_IN_BYTES){
+        memory = new byte[MEMORY_SIZE_IN_BYTES];
+    }
+
+    
+    void storeByte (int addr, int data) {
+        memory[addr] = (byte) (data & 0xFF);
+    }
+
+    
+    void storeHalfWord(int addr, short data) {
+        memory[addr]    = (byte) ((data & 0x00FF));
+        memory[addr+1]  = (byte) ((data & 0xFF00) >>> 8);
+    }
+
+   
+    void storeWord(int addr, int data) {
+        memory[addr]    = (byte) ((data & 0x000000FF));
+        memory[addr+1]  = (byte) ((data & 0x0000FF00) >>> 8);
+        memory[addr+2]  = (byte) ((data & 0x00FF0000) >>> 16);
+        memory[addr+3]  = (byte) ((data & 0xFF000000) >>> 24);
+    }
+
+    void storeInstruction(int addr, int [] data) 
+    {   
+        int rez = 0; 
+        
+        for(int i=0; i<32; i++) 
+        { 
+            rez = rez + (int)(Math.pow(2,i) * data[i]);
+        } 
+        
+        storeWord(addr, rez); 
+    }
+  
+    byte getByte (int addr) {
+        return memory[addr];
+    }
+
+    
+    int getHalfWord(int addr){
+        return (getByte(addr+1) << 8) | (getByte(addr) & 0xFF);
+    }
+
+    
+    int getWord(int addr){
+        return (getHalfWord(addr+2) << 16) | (getHalfWord(addr) & 0xFFFF);
+    }
+
+    String getString(int addr){
+        String returnValue = "";
+        int i = 0;
+        while(memory[addr+i] != 0){
+	    returnValue += (char) (memory[addr+i]);
+	    i++;
+        }
+        return returnValue;
+    }
+
+    byte[] getMemory() {
+        return memory;
+    }
+	
+    void setMemory(byte[] mem){
+        this.memory = mem;
+    }
+    
+    
 }
 
 class Main5 {
     public static void main(String[] args) {
         try {
+            Memory instructionMemory = new Memory(1024);
+            int indexAdresare = 0; 
             File myObj = new File("in.txt");
             Scanner myReader = new Scanner(myObj);
             List<LinieCurata> Program = new ArrayList<>();
@@ -591,13 +664,27 @@ class Main5 {
 
                 Instructiune instructiune = new Instructiune(linie, curent, Program);
                 int[] rez = instructiune.returnRez();
+                
+                instructionMemory.storeInstruction(indexAdresare, rez);
+                indexAdresare += 4; 
 
                 for (int i = 31; i >= 0; i--) {
                     System.out.print(rez[i]);
                 }
                 System.out.println("");
                 curent++;
-            }
+                
+                
+            } 
+            
+             byte [] memoriePentruAfisare = instructionMemory.getMemory(); 
+                for(int i=0; i<8; i++) 
+                { 
+                    System.out.println(memoriePentruAfisare[i]);
+                    String binaryString = String.format("%8s", Integer.toBinaryString(memoriePentruAfisare[i]& 0xFF)).replace(' ', '0');
+
+                    System.out.println(binaryString);
+                }
         } catch (FileNotFoundException e) {
             System.out.println("Eroare la citirea fisierului.");
             e.printStackTrace();
